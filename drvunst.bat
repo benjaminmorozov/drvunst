@@ -10,9 +10,9 @@ if not "%1"=="am_admin" (
 )
 @echo off
 title drvunst.bat - Benjamin Morozov 26.7.2024
-cls
 
 :main
+cls
 ECHO ==================================================
 ECHO Uninstall driver(s) using pnputil
 ECHO 1. List all drivers                                                            
@@ -21,30 +21,50 @@ ECHO 3. Uninstall single driver
 ECHO 4. Uninstall all drivers
 ECHO 0. Exit
 ECHO ==================================================
-set /p "Selection=op: " || set "Selection=nothing"
-if "%Selection%"=="nothing" ECHO "%Selection%" is not valid please try again else if "%Selection%"=="1" goto list else if "%Selection%"=="2" goto export else if "%Selection%"=="3" goto uninstone else if "%Selection%"=="4" goto uninstall else if "%Selection%"=="0" goto Exit else goto Exit
+choice /c 12340 /n  
+goto choice%errorlevel%
 
+:choice0
+Exit
 
-:list
-echo Listing...
+:choice1
+cls
+ECHO ==================================================
+echo Listing drivers:
 pnputil /e
+ECHO ==================================================
+pause
 goto main
 
-:export
-echo Exporting...
-pnputil /export-driver * C:\Drivers
+:choice2
+cls
+ECHO ==================================================
+echo Exporting drivers...
+pnputil /export-driver * C:\DRIVERS
+echo Done! Opening in explorer...
+explorer C:\Drivers
+ECHO ==================================================
 goto main
 
-:uninstone
-echo err:not implemented
+:choice3
+cls
+ECHO ==================================================
+echo Listing drivers for selection:
+pnputil /e
+ECHO ==================================================
+echo Select driver:
+set /p "Selection=filename: "
+echo Uninstalling "%Selection%"...
+pnputil /delete-driver "%Selection%" /uninstall /force
+pause
 goto main
 
-:uninstall
+:choice4
+ECHO ==================================================
+echo Uninstalling all drivers...
 for /F "tokens=4" %%i in ('pnputil /e ^| findstr /R inf') do (
-    echo Uninstalling %%i
+    echo Uninstalling %%i...
     pnputil /delete-driver %%i /uninstall /force
 )
+ECHO ==================================================
 goto main
-
-echo done
-pause
